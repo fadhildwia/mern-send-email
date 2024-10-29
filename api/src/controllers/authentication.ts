@@ -1,7 +1,8 @@
-import { createUser, createUserActivity, getUserByEmail, getUserById } from '../db/users';
+import { createUser, getUserByEmail, getUserById } from '../db/users';
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { createUserActivity } from '../db/userActivities';
 
 export const register = async (req: Request, res: Response) => {
   const { email, password } = req.body;
