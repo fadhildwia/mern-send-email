@@ -1,4 +1,4 @@
-import { createUser, getUserByEmail, getUserById } from '../db/users';
+import { createUser, createUserActivity, getUserByEmail, getUserById } from '../db/users';
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -44,8 +44,12 @@ export const login = async (req: Request, res: Response) => {
 
     user.loginTimestamp = new Date();
     await user.save();
+    await createUserActivity({
+      userId: user._id,
+      loginTimestamp: user.loginTimestamp
+    }) 
 
-    const token = jwt.sign({ userId: user._id }, process.env.MONGO_URL);
+    const token = jwt.sign({ userId: user._id, loginTimestamp: user.loginTimestamp }, process.env.MONGO_URL);
     res.json({ user, token });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
@@ -69,6 +73,10 @@ export const logout = async (req: Request, res: Response) => {
 
     user.logoutTimestamp = new Date();
     await user.save();
+    await createUserActivity({
+      userId: user._id,
+      logoutTimestamp: user.logoutTimestamp
+    }) 
 
     res.json({ message: 'Logged out successfully' });
   } catch (error) {
