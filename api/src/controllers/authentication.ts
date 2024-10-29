@@ -12,22 +12,22 @@ export const register = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Email & password required!' });
     }
 
-    const existingUser = await getUserByEmail(email)
+    const existingUser = await getUserByEmail(email);
     if (existingUser) {
-      return res.status(400).json({ error: 'User already exist' });
+      return res.status(400).json({ error: 'User already exists' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10)
+    const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await createUser({
       email,
-      password: hashedPassword
-    })
+      password: hashedPassword,
+    });
 
     return res.status(200).json(newUser).end();
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
-}
+};
 
 export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
