@@ -3,15 +3,15 @@ import mongoose from "mongoose";
 interface IUser extends mongoose.Document {
   email: string;
   password: string;
-  loginTimeStamp: Date,
-  logoutTimeStamp: Date
+  loginTimestamp: Date,
+  logoutTimestamp: Date
 }
 
 const UserSchema = new mongoose.Schema({
   email: { type: String, require: true },
   password: { type: String, require: true },
-  loginTimeStamp: Date,
-  logoutTimeStamp: Date
+  loginTimestamp: Date,
+  logoutTimestamp: Date
 })
 
 export const UserModel = mongoose.model<IUser>('User', UserSchema);

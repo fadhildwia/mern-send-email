@@ -1,6 +1,7 @@
-import { createUser, getUserByEmail } from '../db/users';
+import { createUser, getUserByEmail, getUserById } from '../db/users';
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 export const register = async (req: Request, res: Response) => {
   const { email, password } = req.body;
@@ -24,5 +25,53 @@ export const register = async (req: Request, res: Response) => {
     return res.status(200).json(newUser).end();
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+export const login = async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await getUserByEmail(email);
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    user.loginTimestamp = new Date();
+    await user.save();
+
+    const token = jwt.sign({ userId: user._id }, process.env.MONGO_URL);
+    res.json({ user, token });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+export const logout = async (req: Request, res: Response) => {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+
+  if (!token) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.MONGO_URL) as { userId: string };
+    const user = await getUserById(decoded.userId)
+
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    user.logoutTimestamp = new Date();
+    await user.save();
+
+    res.json({ message: 'Logged out successfully' });
+  } catch (error) {
+    res.status(401).json({ error: 'Invalid token' });
   }
 }
