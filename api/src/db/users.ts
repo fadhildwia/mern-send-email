@@ -3,15 +3,15 @@ import mongoose from "mongoose";
 interface IUser extends mongoose.Document {
   email: string;
   password: string;
-  loginTimestamp: Date,
-  logoutTimestamp: Date
+  loginAt: Date,
+  logoutAt: Date
 }
 
 const UserSchema = new mongoose.Schema({
   email: { type: String, require: true },
   password: { type: String, require: true },
-  loginTimestamp: Date,
-  logoutTimestamp: Date
+  loginAt: Date,
+  logoutAt: Date
 })
 
 
