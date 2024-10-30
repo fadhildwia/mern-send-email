@@ -17,11 +17,11 @@ const ModalAlert: React.FC<ModalAlertProps> = ({ title, description, btnTitle, s
   return (
     <>
       <div
-        className="fixed inset-0 transition-opacity bg-gray-500 opacity-75"
+        className="fixed z-40 inset-0 transition-opacity bg-gray-500 opacity-75"
         onClick={onCancel}
       ></div>
 
-      <div className="fixed z-50 inset-0 overflow-y-auto pt-20">
+      <div className="fixed z-40 inset-0 overflow-y-auto pt-20">
         <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
           <div className="w-full inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
             <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
