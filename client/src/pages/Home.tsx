@@ -13,7 +13,6 @@ const Home = (props: Props) => {
   return (
     <div>
       <h2>Home</h2>
-      <button onClick={handleHome}>Home</button>
     </div>
   );
 }

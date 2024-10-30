@@ -1,6 +1,48 @@
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
+import usePostUserLogin from "../hooks/usePostUserLogin";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { useState } from "react";
+import { appCookies } from "../utils/appCookies";
 
 const Login = () => {
+  const { setCookie } = appCookies();
+  const navigate = useNavigate();
+
+  const [error, setError] = useState<string>('');
+
+  const { mutateAsync: mutateAsyncLogin } = usePostUserLogin({
+    onSuccess: (res) => {
+      setCookie({
+        name: 'access_token',
+        value: res.token
+      });
+      navigate('/');
+    },
+    onError: (err: any) => {
+      const errorMessage = err.response?.data.error;
+
+      setError(errorMessage)
+    }
+  });
+
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+    validateOnChange: false,
+    validateOnBlur: false,
+    validationSchema: Yup.object({
+      email: Yup.string().email("Invalid email address").required("Required"),
+      password: Yup.string().required("Required"),
+    }),
+    onSubmit: async (values) => {
+      setError('');
+      await mutateAsyncLogin(values);
+    },
+  });
+
   return (
     <div className="flex flex-col h-screen bg-gray-100">
       <div className="grid place-items-center mx-2 my-20 sm:my-auto">
@@ -13,7 +55,7 @@ const Login = () => {
             Login
           </h2>
 
-          <form className="mt-10" method="POST">
+          <form className="mt-10" onSubmit={formik.handleSubmit}>
             <label
               htmlFor="email"
               className="block text-xs font-semibold text-gray-600 uppercase"
@@ -23,15 +65,21 @@ const Login = () => {
             <input
               id="email"
               type="email"
-              name="email"
-              placeholder="e-mail address"
-              autoComplete="email"
-              className="block w-full py-3 px-1 mt-2 
+              {...formik.getFieldProps("email")}
+              className={`block w-full py-3 px-1 mt-2 
                         text-gray-800 appearance-none 
                         border-b-2 border-gray-100
-                        focus:text-gray-500 focus:outline-none focus:border-gray-200"
-              required
+                        focus:text-gray-500 focus:outline-none focus:border-gray-200 ${
+                          formik.touched.email && formik.errors.email
+                            ? "border-red-500"
+                            : ""
+                        }`}
             />
+            {formik.touched.email && formik.errors.email && (
+              <div className="text-red-500 text-sm mt-1">
+                {formik.errors.email}
+              </div>
+            )}
 
             <label
               htmlFor="password"
@@ -42,15 +90,27 @@ const Login = () => {
             <input
               id="password"
               type="password"
-              name="password"
-              placeholder="password"
-              autoComplete="current-password"
-              className="block w-full py-3 px-1 mt-2 mb-4
+              {...formik.getFieldProps("password")}
+              className={`block w-full py-3 px-1 mt-2 mb-4
                         text-gray-800 appearance-none 
                         border-b-2 border-gray-100
-                        focus:text-gray-500 focus:outline-none focus:border-gray-200"
-              required
+                        focus:text-gray-500 focus:outline-none focus:border-gray-200 ${
+                          formik.touched.password && formik.errors.password
+                            ? "border-red-500"
+                            : ""
+                        }`}
             />
+            {formik.touched.password && formik.errors.password && (
+              <div className="text-red-500 text-sm mt-1">
+                {formik.errors.password}
+              </div>
+            )}
+
+            {formik.values.email && formik.values.password && error && (
+              <div className="text-red-500 text-sm mt-1">
+                {error}
+              </div>
+            )}
 
             <button
               type="submit"
@@ -70,14 +130,14 @@ const Login = () => {
                 or
               </p>
               <Link to="/register" className="flex-1 underline text-right">
-              Create an Account
+                Create an Account
               </Link>
             </div>
           </form>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export default Login
