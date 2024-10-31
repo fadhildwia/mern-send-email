@@ -48,6 +48,10 @@ const Home = () => {
         navigate("/login")
         removeCookie({ name: "access_token" })
       },
+      onError: () => {
+        navigate("/login")
+        removeCookie({ name: "access_token" })
+      }
     })
 
   const { mutate: mutateSendEmail, isLoading: isLoadingSendEmail } =

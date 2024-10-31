@@ -18,9 +18,11 @@ export const axiosInterceptorRequest = async (requestConfig: InternalAxiosReques
 };
 
 export const axiosInterceptorResponseError = async (error: AxiosError) => {
+  console.log('error axios', error)
   const status = error.response ? error.response.status : null;
-  if (status == 403) {
+  if (status === 403 || status === 401) {
     removeCookie({ name: 'access_token' });
+    window.location.pathname = '/login';
   }
   return Promise.reject(error);
 };

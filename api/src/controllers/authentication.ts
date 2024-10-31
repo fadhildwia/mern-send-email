@@ -42,15 +42,16 @@ export const login = async (req: Request, res: Response) => {
     if (!isPasswordValid) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
-
+    const token = jwt.sign({ userId: user._id, loginAt: user.loginAt }, process.env.MONGO_URL);
+    user.token = token;
     user.loginAt = new Date();
+
     await user.save();
     await createUserActivity({
       userId: user._id,
       loginAt: user.loginAt
     }) 
 
-    const token = jwt.sign({ userId: user._id, loginAt: user.loginAt }, process.env.MONGO_URL);
     res.json({ user, token });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
@@ -72,6 +73,7 @@ export const logout = async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Invalid token' });
     }
 
+    user.token = '';
     user.logoutAt = new Date();
     await user.save();
     await createUserActivity({
