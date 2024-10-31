@@ -11,6 +11,6 @@ export const getUser = async (req: Request, res: Response) => {
 
     return res.status(200).json(user)
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(403).json({ error: 'Forbidden' });
   }
 }

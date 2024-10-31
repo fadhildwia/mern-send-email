@@ -2,15 +2,26 @@ import { Link, useNavigate } from "react-router-dom"
 import usePostUserLogin from "../hooks/usePostUserLogin";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { appCookies } from "../utils/appCookies";
 import Loading from "../components/Loading";
+import useGetUser from "../hooks/useGetUser";
 
 const Login = () => {
-  const { setCookie } = appCookies();
+  const { setCookie, getCookie } = appCookies();
   const navigate = useNavigate();
 
   const [error, setError] = useState<string>('');
+  const [token, setToken] = useState<string>('');
+
+  const { isLoading: isLoadingUser } = useGetUser({
+    options: {
+      enabled: !!token,
+      onSuccess: () => {
+        navigate('/');
+      },
+    }
+  });
 
   const { mutateAsync: mutateAsyncLogin, isLoading } = usePostUserLogin({
     onSuccess: (res) => {
@@ -26,6 +37,16 @@ const Login = () => {
       setError(errorMessage)
     }
   });
+
+  useEffect(() => {
+    const fetchToken = async () => {
+      const accessToken = await getCookie({ name: 'access_token' });
+      setToken(accessToken as string);
+    };
+
+    fetchToken();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const formik = useFormik({
     initialValues: {
@@ -46,7 +67,7 @@ const Login = () => {
 
   return (
     <>
-      <Loading isShow={isLoading} />
+      <Loading isShow={isLoading || isLoadingUser} />
       <div className="flex flex-col h-screen bg-gray-100">
         <div className="grid place-items-center mx-2 my-20 sm:my-auto">
           <div
